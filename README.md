@@ -2,13 +2,6 @@
 
 Docs-first, modular CRM + ERP platform implemented across multiple full-stack technologies to compare architectural approaches, performance characteristics, and development workflows.
 
-## Core Features
-
-- Customer management (CRM)
-- Sales and opportunity tracking
-- Product and inventory management
-- Reports and dashboards
-
 ## Stacks
 
 - Flutter + Firebase
@@ -22,7 +15,6 @@ Documentation and design phase.
 
 ## Repository Structure
 
-- `/docs` — general project documentation (requirements, architecture, data model)
-  
-- `/stacks` — technology-specific implementations
+- `/docs` — system documentation (scope, requirements, architecture, data model, business rules)
+- `/stacks` — stack-specific implementations of the same core system
   
