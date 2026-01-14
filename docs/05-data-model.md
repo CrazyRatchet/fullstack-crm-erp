@@ -6,6 +6,7 @@
 - User
 - Role
 - Customer
+- Interaction
 - Product
 - Sale
 - Invoice
