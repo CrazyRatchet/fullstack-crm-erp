@@ -1,0 +1,66 @@
+#Nombre del proyecto
+name: react-python-stack
+
+services:
+  #PostgreSQL Database
+  react_python_postgres:
+    image: postgres:15 #Imagen oficial
+    container_name: react_python_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: react_python_db
+      POSTGRES_USER: react_python_user
+      POSTGRES_PASSWORD: react_python_password
+
+    volumes:
+      #Volumen persistente
+      - react_python_postgres_data:/var/lib/postgresql/data
+    ports:
+      #El primer número es el puerto de mi máquina
+      #El segundo es el puerto interno del contenedor
+      #Cambiar el primero si otro stack usa 5432
+      - "5433:5432"
+    networks:
+      - react_python_network
+
+  # Redis (cache + celery broker)
+  react_python_redis:
+    image: redis:7
+    container_name: react_python_redis
+    restart: always
+
+    ports:
+      #Cambiar si otro usa 6379
+      - "6380:6379"
+    networks:
+      - react_python_network
+
+  #Backend Service
+  react_python_backend:
+    build:
+      context: ./backend #Carpeta donde está el Dockerfile
+      dockerfile: Dockerfile
+    container_name: react_python_backend
+
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:
+      #Conecta la carpeta local con
+      # la carpeta /app dentro del contenedor
+      - ./backend:/app
+    ports:
+      #CAmbiar si está ocupado
+      - "8001:8000"
+    depends_on:
+      - react_python_postgres
+      - react_python_redis
+    networks:
+      - react_python_network
+
+#Volumenes persistentes
+volumes:
+  react_python_postgres_data:
+
+#Red privada interna
+networks:
+  react_python_network:
