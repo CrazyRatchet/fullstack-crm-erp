@@ -1,0 +1,32 @@
+// .devcontainer/devcontainer.json
+{
+    "name": "CRM/ERP Backend",
+    "dockerComposeFile": "../docker-compose.yml",
+    // ← Debe coincidir EXACTAMENTE con el nombre en docker-compose.yml
+    "service": "react_python_backend",
+    // ← Debe coincidir con el volumen: ./backend:/app
+    "workspaceFolder": "/app",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.pylance",
+                "ms-python.black-formatter",
+                "ms-python.isort",
+                "charliermarsh.ruff",
+                "redhat.vscode-yaml"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "editor.formatOnSave": true,
+                "[python]": {
+                    "editor.defaultFormatter": "ms-python.black-formatter",
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": "explicit"
+                    }
+                }
+            }
+        }
+    },
+    "postCreateCommand": "pip install -r requirements.txt"
+}
