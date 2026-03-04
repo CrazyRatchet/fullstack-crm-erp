@@ -1,6 +1,13 @@
 # Environment variables — never commit these
 .env
 
+# Logs
+*.log
+logs/
+
+# Django auto-generated test files (we use tests/ folders instead)
+**/tests.py
+
 # Python
 __pycache__/
 *.pyc
