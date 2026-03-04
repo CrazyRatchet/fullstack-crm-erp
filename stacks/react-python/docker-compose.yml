@@ -44,12 +44,17 @@ services:
 
     command: python manage.py runserver 0.0.0.0:8000
 
+    #Tell docker-compose to read the .env file from the project root
+    #and inject all variables into the container's environment
+    env_file:
+      - .env
+
     volumes:
       #Conecta la carpeta local con
       # la carpeta /app dentro del contenedor
       - ./backend:/app
     ports:
-      #CAmbiar si está ocupado
+      #Cambiar si está ocupado
       - "8001:8000"
     depends_on:
       - react_python_postgres

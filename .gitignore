@@ -1,0 +1,21 @@
+# Environment variables — never commit these
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Logs
+logs/*.log
+
+# Test coverage
+.coverage
+htmlcov/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
