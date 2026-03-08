@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { getToken } from '@/src/services/tokenService';
+
 // Base URL of the backend API
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8001';
 
@@ -13,7 +15,12 @@ const api = axios.create({
 
 // Request interceptor - runs before every request is sent
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // Get token from secure storage and attached to request
+    const token = await getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
