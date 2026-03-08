@@ -1,10 +1,10 @@
 import axios from 'axios';
 // Base URL of the backend API
-const BASE_URL = 'http://localhost:8001';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8001';
 
 // Create a custom Axios instance with default configuration
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: `${BASE_URL}/api`,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
