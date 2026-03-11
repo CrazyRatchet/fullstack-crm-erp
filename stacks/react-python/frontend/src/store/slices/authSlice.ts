@@ -1,3 +1,5 @@
+// src/store/slices/authSlice.ts
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Shape of the authenticated user
