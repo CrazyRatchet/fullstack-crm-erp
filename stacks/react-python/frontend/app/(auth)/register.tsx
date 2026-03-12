@@ -1,9 +1,21 @@
-import { View, Text } from 'react-native';
+// app/(auth)/login.tsx
+
+import RegisterForm from '@/src/components/auth/RegisterForm';
 
 export default function RegisterScreen() {
-  return (
-    <View className="flex-1 justify-center items-center">
-      <Text>Register Screen</Text>
-    </View>
-  );
+  // onSubmit will connect to the API
+
+  const handleRegister = async (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    companyName: string;
+    companySlug: string;
+  }) => {
+    console.log('Register data:', data);
+  };
+
+  return <RegisterForm onSubmit={handleRegister} />;
 }
