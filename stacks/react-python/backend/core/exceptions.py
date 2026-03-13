@@ -47,7 +47,7 @@ def custom_exception_handler(exc, context):
 
         logger.warning(
             "API error %s in %s: %s",
-            response.status.code.view.__class__.__name__ if view else "unknown",
+            view.__class__.__name__ if view else "unknown",
             response.data,
         )
 
@@ -67,7 +67,7 @@ def custom_exception_handler(exc, context):
                 "error": {
                     "code": "server_error",
                     "message": "Internal server error",
-                    "deatils": {},
+                    "details": {},
                 },
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,

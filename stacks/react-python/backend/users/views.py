@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.serializers import RegisterSerializer, LoginSerializer
+from users.permissions import IsAdminOrAbove
+
 
 
 class RegisterView(APIView):
