@@ -35,3 +35,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         # create_user handles password hashing automatically
         user = User.objects.create_user(password=password, **validated_data)
         return user
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
