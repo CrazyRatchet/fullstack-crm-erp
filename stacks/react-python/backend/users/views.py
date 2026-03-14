@@ -99,9 +99,11 @@ class UserListView(generics.ListAPIView):
     permission_classes = [IsAdminOrAbove]
 
     def get_queryset(self):
+        # Return empty queryset for schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return User.objects.none()
         # Only return users belonging to the same tenant
-        return User.objects.filter(tenant=self.request.user.tenant)
-
+        return User.objects.filter(tenant=self.request.user.tenant).order_by('created_at')
 
 class UserDetailView(APIView):
     """
@@ -111,10 +113,12 @@ class UserDetailView(APIView):
     """
     permission_classes = [IsAdminOrAbove]
 
+    @extend_schema(responses={200: UserSerializer})
     def get_object(self, request, pk):
         # Get user within the same tenant
         return User.objects.filter(tenant=request.user.tenant, pk=pk).first()
 
+    @extend_schema(request=UpdateUserSerializer, responses={200: UserSerializer})
     def get(self, request, pk):
         user = self.get_object(request, pk)
         if not user:
@@ -122,6 +126,7 @@ class UserDetailView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    @extend_schema(request=UpdateUserSerializer, responses={200: UserSerializer})
     def patch(self, request, pk):
         user = self.get_object(request, pk)
         if not user:
@@ -140,6 +145,7 @@ class DeactivateUserView(APIView):
     """
     permission_classes = [IsAdminOrAbove]
 
+    @extend_schema(request=UpdateUserSerializer, responses={200: UserSerializer})
     def patch(self, request, pk):
         # Get user within the same tenant
         user = User.objects.filter(tenant=request.user.tenant, pk=pk).first()
