@@ -26,3 +26,61 @@ class TimeStampedModel(models.Model):
 
     class Meta:
         abstract = True
+
+class AuditLog(TimeStampedModel):
+    """
+    Records important actions performed by users in the system.
+
+    Why store audit logs in the database?
+    - Queryable and filterable by authorized users
+    - Survives server restarts unlike in-memory logs
+    - Required for compliance and accountability
+
+    Note: user and tenant are nullable to support system-level
+    actions that occur before or outside of user context.
+    """
+
+    class Action(models.TextChoices):
+        # Auth actions
+        LOGIN_SUCCESS = 'login_success', 'Login Success'
+        LOGIN_FAILED = 'login_failed', 'Login Failed'
+        LOGOUT = 'logout', 'Logout'
+        REGISTER = 'register', 'Register'
+        # User management actions
+        USER_CREATED = 'user_created', 'User Created'
+        USER_UPDATED = 'user_updated', 'User Updated'
+        USER_DEACTIVATED = 'user_deactivated', 'User Deactivated'
+        ROLE_CHANGED = 'role_changed', 'Role Changed'
+
+    # Who performed the action (null if system or anonymous)
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs',
+    )
+
+    # Which tenant this action belongs to
+    tenant = models.ForeignKey(
+        'tenants.Tenant',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs',
+    )
+
+    action = models.CharField(max_length=50, choices=Action.choices)
+
+    # IP address of the request
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    # Additional context about the action
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        db_table = 'audit_logs'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.action} by {self.user} at {self.created_at}'

@@ -6,6 +6,8 @@ from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.serializers import RegisterSerializer, LoginSerializer, UserSerializer, UpdateUserSerializer
 from users.permissions import IsAdminOrAbove
+from core.services import AuditService
+from core.models import AuditLog
 
 User = get_user_model()
 
@@ -27,6 +29,12 @@ class RegisterView(APIView):
 
         if serializer.is_valid():
             user = serializer.save()
+            AuditService.log(
+                action=AuditLog.Action.REGISTER,
+                request=request,
+                user=user,
+                metadata={'email': user.email},
+            )
             return Response(
                 {
                     "message": "User registered successfully.",
@@ -67,6 +75,11 @@ class LoginView(APIView):
         user = authenticate(request, username=email, password=password)
 
         if user is None:
+            AuditService.log(
+                action=AuditLog.Action.LOGIN_FAILED,
+                request=request,
+                metadata={'email': email},
+            )
             return Response(
                 {"error": "Invalid email or password."},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -74,6 +87,13 @@ class LoginView(APIView):
 
         # Generate JWT tokens for the authenticated user
         refresh = RefreshToken.for_user(user)
+
+        AuditService.log(
+            action=AuditLog.Action.LOGIN_SUCCESS,
+            request=request,
+            user=user,
+            metadata={'email': user.email},
+        )
 
         return Response(
             {
@@ -134,6 +154,17 @@ class UserDetailView(APIView):
         serializer = UpdateUserSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
+            action = (
+                AuditLog.Action.ROLE_CHANGED
+                if 'role' in request.data
+                else AuditLog.Action.USER_UPDATED
+            )
+            AuditService.log(
+                action=action,
+                request=request,
+                user=request.user,
+                metadata={'updated_user': user.email, 'changes': request.data},
+            )
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -165,6 +196,12 @@ class DeactivateUserView(APIView):
 
         user.is_active = False
         user.save()
+        AuditService.log(
+            action=AuditLog.Action.USER_DEACTIVATED,
+            request=request,
+            user=request.user,
+            metadata={'deactivated_user_email': user.email},
+        )
         return Response(
             {'message': f'User {user.email} has been deactivated.'},
             status=status.HTTP_200_OK,
