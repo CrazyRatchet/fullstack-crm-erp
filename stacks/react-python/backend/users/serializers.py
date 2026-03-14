@@ -39,3 +39,44 @@ class RegisterSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+
+class UserSerializer(serializers.ModelSerializer):
+    """Read-only serializer for listing and retrieving users."""
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'phone',
+            'role',
+            'is_active',
+            'tenant',
+            'created_at',
+        ]
+        read_only_fields = fields
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    """Serializer for updating user profile and role."""
+
+    class Meta:
+        model = User
+        fields = [
+            'first_name',
+            'last_name',
+            'phone',
+            'role',
+            'is_active',
+        ]
+
+    def validate_role(self, value):
+        request = self.context.get('request')
+
+        # Only super admins can assign the super_admin role
+        if value == User.Role.SUPER_ADMIN and not request.user.has_role(User.Role.SUPER_ADMIN):
+            raise serializers.ValidationError('You cannot assign the super_admin role.')
+        return value
