@@ -1,0 +1,76 @@
+# .github/workflows/ci.yml
+
+name: CI
+
+# Triggers: runs on push or pull request to main or develop
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+
+jobs:
+    backend:
+        name: Backend — Lint + Tests
+        runs-on: ubuntu-latest
+
+        # These services mirror your docker-compose.yml
+        # GitHub Actions spins them up before running your tests
+        services:
+            postgres:
+                image: postgres:15
+                env:
+                    POSTGRES_DB: test_db
+                    POSTGRES_USER: test_user
+                    POSTGRES_PASSWORD: test_password
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+            redis:
+                image: redis:7
+                options: >-
+                    --health-cmd "redis-cli ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 6379:6379
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.11"
+                  cache: "pip"
+
+            - name: Install dependencies
+              run: pip install -r backend/requirements.txt
+
+            - name: Check formatting with black
+              run: black --check backend/
+
+            - name: Check import order with isort
+              run: isort --check-only backend/
+
+            - name: Run tests with coverage
+              env:
+                  SECRET_KEY: ci-test-secret-key-not-for-production
+                  DEBUG: "True"
+                  POSTGRES_DB: test_db
+                  POSTGRES_USER: test_user
+                  POSTGRES_PASSWORD: test_password
+                  POSTGRES_HOST: localhost
+                  POSTGRES_PORT: "5432"
+                  REDIS_URL: redis://localhost:6379/0
+                  ALLOWED_HOSTS: localhost
+                  SENTRY_DSN: ""
+              working-directory: backend
+              run: pytest --cov=. --cov-report=term-missing

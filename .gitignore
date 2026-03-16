@@ -1,0 +1,28 @@
+# Environment variables — never commit these
+.env
+
+# Logs
+*.log
+logs/
+
+# Django auto-generated test files (we use tests/ folders instead)
+**/tests.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Logs
+logs/*.log
+
+# Test coverage
+.coverage
+htmlcov/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
