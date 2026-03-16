@@ -8,6 +8,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     # Write-only fields not stored directly in the model
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
+    # Company fields — used to create the tenant during registration
+    company_name = serializers.CharField(write_only=True, max_length=255)
+    company_slug = serializers.SlugField(write_only=True, max_length=100)
 
     class Meta:
         model = User
@@ -19,6 +22,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "phone",
+            "company_name",
+            "company_slug"
         ]
 
     def validate(self, attrs):
@@ -31,10 +36,30 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Remove password_confirm before creating the user
         validated_data.pop("password_confirm")
         password = validated_data.pop("password")
+        
+        # Extract company fields before creating user
+        company_name = validated_data.pop("company_name")
+        company_slug = validated_data.pop("company_slug")
+        
+        from tenants.models import Tenant
+        
+        # Create the tenant first
+        tenant = Tenant.objects.create(name=company_name, slug=company_slug)
 
         # create_user handles password hashing automatically
-        user = User.objects.create_user(password=password, **validated_data)
+        user = User.objects.create_user(password=password, tenant=tenant, role=User.Role.BUSINESS_ADMIN, **validated_data)
         return user
+    
+    def validate_company_slug(self, value):
+        # Import inside the method to avoid circular import at module level
+        from tenants.models import Tenant
+        
+        # Check if the slug is alredady taken before attempting to create
+        if Tenant.objects.filter(slug=value).exists():
+            raise serializers.ValidationError(
+                'This company identifier is already taken. Please choose another.'
+            )
+        return value
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
