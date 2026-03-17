@@ -6,8 +6,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface User {
   id: string;
   email: string;
-  role: string;
-  tenantId: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  role?: string;
+  tenantId?: string;
 }
 
 // Shape of the auth state
