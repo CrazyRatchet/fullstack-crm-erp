@@ -12,9 +12,9 @@ module.exports = defineConfig([
       prettier: prettierPlugin,
     },
     rules: {
-      //Prettier formatting issues will show as ESLint errors
-      'prettier/prettier': 'error',
+      'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
+
     ignores: ['dist/*'],
   },
 ]);
