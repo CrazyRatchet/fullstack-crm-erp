@@ -1,20 +1,28 @@
 // app/(auth)/login.tsx
 
 import RegisterForm from '@/src/components/auth/RegisterForm';
-
+import { useRouter } from 'expo-router';
+import { register } from '@/src/services/authService';
 export default function RegisterScreen() {
-  // onSubmit will connect to the API
+  // onSubmit  connect to the API
+  const router = useRouter();
 
   const handleRegister = async (data: {
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     email: string;
+    phone?: string;
     password: string;
-    confirmPassword: string;
-    companyName: string;
-    companySlug: string;
+    password_confirm: string;
+    company_name: string;
+    company_slug: string;
   }) => {
-    console.log('Register data:', data);
+    try {
+      const result = await register(data);
+      router.replace('/(auth)/login');
+    } catch (error) {
+      console.error('Register Failed: ', error);
+    }
   };
 
   return <RegisterForm onSubmit={handleRegister} />;
