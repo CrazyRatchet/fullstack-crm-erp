@@ -11,17 +11,18 @@ class RegisterSerializer(serializers.ModelSerializer):
     # Company fields — used to create the tenant during registration
     company_name = serializers.CharField(write_only=True, max_length=255)
     company_slug = serializers.SlugField(write_only=True, max_length=100)
+    # Optionality of phone number
+    phone = serializers.CharField(required=False, allow_blank=True, default='')
 
     class Meta:
         model = User
         fields = [
-            "email",
-            "username",
-            "password",
-            "password_confirm",
             "first_name",
             "last_name",
+            "email",
             "phone",
+            "password",
+            "password_confirm",
             "company_name",
             "company_slug"
         ]
@@ -31,8 +32,34 @@ class RegisterSerializer(serializers.ModelSerializer):
         if attrs["password"] != attrs["password_confirm"]:
             raise serializers.ValidationError({"password": "Passwords do not match."})
         return attrs
+    
+    def generate_username(self, first_name: str, last_name: str) -> str:
+        import unicodedata
+        
+        def normalize(text: str) -> str:
+            # Convert accented characters to ASCII equivalents
+            normalized = unicodedata.normalize('NFKD', text)
+            ascii_text = normalized.encode('ascii', 'ignore').decode('ascii')
+            return ascii_text.lower()
+        #Generates a unique username from first and last name.
+        
+        # Build base username from name — lowercase, replace spaces with dots
+        base = f"{normalize(first_name)}.{normalize(last_name)}"
+        # Remove any character that isn't a letter, number or dot
+        base = ''.join(c for c in base if c.isalnum() or c == '.')
+        
+        username = base
+        counter = 1
+        
+        # Keep incrementing until we find a username that doesn't exist
+        while User.objects.filter(username=username).exists():
+            username = f"{base}{counter}"
+            counter += 1
+        
+        return username
 
     def create(self, validated_data):
+        
         # Remove password_confirm before creating the user
         validated_data.pop("password_confirm")
         password = validated_data.pop("password")
@@ -46,8 +73,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Create the tenant first
         tenant = Tenant.objects.create(name=company_name, slug=company_slug)
 
+        # Auto-generate username from first and last name
+        username = self.generate_username(
+            validated_data['first_name'],
+            validated_data['last_name']
+        )
+        
         # create_user handles password hashing automatically
-        user = User.objects.create_user(password=password, tenant=tenant, role=User.Role.BUSINESS_ADMIN, **validated_data)
+        user = User.objects.create_user(password=password,
+                                        username=username, 
+                                        tenant=tenant, 
+                                        role=User.Role.BUSINESS_ADMIN, 
+                                        **validated_data)
         return user
     
     def validate_company_slug(self, value):

@@ -14,13 +14,12 @@ interface LoginCredentials {
 }
 
 interface RegisterData {
-  email: string;
-  username: string;
-  password: string;
-  password_confirm: string;
   first_name: string;
   last_name: string;
-  phone: string;
+  email: string;
+  phone?: string;
+  password: string;
+  password_confirm: string;
   company_name: string;
   company_slug: string;
 }

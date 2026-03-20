@@ -20,20 +20,21 @@ import { colors, spacing, radius } from '@/src/constants/theme';
 // --- VALIDATION SCHEMA ---
 const registerSchema = z
   .object({
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
+    first_name: z.string().min(1, 'First name is required'),
+    last_name: z.string().min(1, 'Last name is required'),
     email: z.email('Enter a valid email address'),
+    phone: z.string().optional(),
     password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    companyName: z.string().min(2, 'Company name must be at least 2 characters'),
-    companySlug: z
+    password_confirm: z.string().min(1, 'Please confirm your password'),
+    company_name: z.string().min(2, 'Company name must be at least 2 characters'),
+    company_slug: z
       .string()
       .min(2, 'Company slug must be at least 2 characters')
       .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens'),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.password === data.password_confirm, {
     message: 'Passwords do not match',
-    path: ['confirmPassword'],
+    path: ['password_confirm'],
   });
 
 // --- TYPE ---
@@ -47,7 +48,7 @@ interface RegisterFormProps {
 
 export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmPassword, setshowConfirmPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
   // Responsive layout — card on web, fullscreen on mobile
@@ -62,24 +63,26 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      first_name: '',
+      last_name: '',
       email: '',
+      phone: '',
       password: '',
-      confirmPassword: '',
-      companyName: '',
-      companySlug: '',
+      password_confirm: '',
+      company_name: '',
+      company_slug: '',
     },
   });
 
   // Validates step 1 fields before allowing navigation to step 2
   const goToNextStep = async () => {
     const isValid = await trigger([
-      'firstName',
-      'lastName',
+      'first_name',
+      'last_name',
       'email',
+      'phone',
       'password',
-      'confirmPassword',
+      'password_confirm',
     ]);
     if (isValid) setCurrentStep(2);
   };
@@ -157,17 +160,17 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                   {/* First name */}
                   <Controller
                     control={control}
-                    name="firstName"
+                    name="first_name"
                     render={({ field: { onChange, onBlur, value } }) => (
                       <View>
-                        <FieldLabel label="First name" hasError={!!errors.firstName} />
+                        <FieldLabel label="First name" hasError={!!errors.first_name} />
                         <TextInput
                           mode="outlined"
                           autoComplete="given-name"
                           value={value}
                           onBlur={onBlur}
                           onChangeText={onChange}
-                          error={!!errors.firstName}
+                          error={!!errors.first_name}
                           outlineColor={colors.border}
                           activeOutlineColor={colors.primary}
                           label=""
@@ -176,26 +179,26 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                       </View>
                     )}
                   />
-                  {errors.firstName && (
+                  {errors.first_name && (
                     <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-                      {errors.firstName.message}
+                      {errors.first_name.message}
                     </Text>
                   )}
 
                   {/* Last name */}
                   <Controller
                     control={control}
-                    name="lastName"
+                    name="last_name"
                     render={({ field: { onChange, onBlur, value } }) => (
                       <View>
-                        <FieldLabel label="Last name" hasError={!!errors.lastName} />
+                        <FieldLabel label="Last name" hasError={!!errors.last_name} />
                         <TextInput
                           mode="outlined"
                           autoComplete="family-name"
                           value={value}
                           onBlur={onBlur}
                           onChangeText={onChange}
-                          error={!!errors.lastName}
+                          error={!!errors.last_name}
                           outlineColor={colors.border}
                           activeOutlineColor={colors.primary}
                           label=""
@@ -204,9 +207,9 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                       </View>
                     )}
                   />
-                  {errors.lastName && (
+                  {errors.last_name && (
                     <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-                      {errors.lastName.message}
+                      {errors.last_name.message}
                     </Text>
                   )}
 
@@ -278,10 +281,10 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                   {/* Confirm password */}
                   <Controller
                     control={control}
-                    name="confirmPassword"
+                    name="password_confirm"
                     render={({ field: { onChange, onBlur, value } }) => (
                       <View>
-                        <FieldLabel label="Confirm password" hasError={!!errors.confirmPassword} />
+                        <FieldLabel label="Confirm password" hasError={!!errors.password_confirm} />
                         <TextInput
                           mode="outlined"
                           secureTextEntry={!showConfirmPassword}
@@ -289,7 +292,7 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                           value={value}
                           onBlur={onBlur}
                           onChangeText={onChange}
-                          error={!!errors.confirmPassword}
+                          error={!!errors.password_confirm}
                           outlineColor={colors.border}
                           activeOutlineColor={colors.primary}
                           label=""
@@ -297,16 +300,16 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                           right={
                             <TextInput.Icon
                               icon={showConfirmPassword ? 'eye-off' : 'eye'}
-                              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                              onPress={() => setshowConfirmPassword(!showConfirmPassword)}
                             />
                           }
                         />
                       </View>
                     )}
                   />
-                  {errors.confirmPassword && (
+                  {errors.password_confirm && (
                     <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-                      {errors.confirmPassword.message}
+                      {errors.password_confirm.message}
                     </Text>
                   )}
 
@@ -329,17 +332,17 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                   {/* Company name */}
                   <Controller
                     control={control}
-                    name="companyName"
+                    name="company_name"
                     render={({ field: { onChange, onBlur, value } }) => (
                       <View>
-                        <FieldLabel label="Company name" hasError={!!errors.companyName} />
+                        <FieldLabel label="Company name" hasError={!!errors.company_name} />
                         <TextInput
                           mode="outlined"
                           autoCapitalize="words"
                           value={value}
                           onBlur={onBlur}
                           onChangeText={onChange}
-                          error={!!errors.companyName}
+                          error={!!errors.company_name}
                           outlineColor={colors.border}
                           activeOutlineColor={colors.primary}
                           label=""
@@ -348,21 +351,21 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                       </View>
                     )}
                   />
-                  {errors.companyName && (
+                  {errors.company_name && (
                     <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-                      {errors.companyName.message}
+                      {errors.company_name.message}
                     </Text>
                   )}
 
                   {/* Company slug */}
                   <Controller
                     control={control}
-                    name="companySlug"
+                    name="company_slug"
                     render={({ field: { onChange, onBlur, value } }) => (
                       <View>
                         <FieldLabel
                           label="Company URL identifier"
-                          hasError={!!errors.companySlug}
+                          hasError={!!errors.company_slug}
                         />
                         <TextInput
                           mode="outlined"
@@ -372,7 +375,7 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                           value={value}
                           onBlur={onBlur}
                           onChangeText={onChange}
-                          error={!!errors.companySlug}
+                          error={!!errors.company_slug}
                           outlineColor={colors.border}
                           activeOutlineColor={colors.primary}
                           label=""
@@ -381,9 +384,9 @@ export default function RegisterForm({ onSubmit, isLoading = false }: RegisterFo
                       </View>
                     )}
                   />
-                  {errors.companySlug && (
+                  {errors.company_slug && (
                     <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-                      {errors.companySlug.message}
+                      {errors.company_slug.message}
                     </Text>
                   )}
 
