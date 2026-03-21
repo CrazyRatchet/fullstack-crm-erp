@@ -18,7 +18,7 @@ export default function RegisterScreen() {
     company_slug: string;
   }) => {
     try {
-      const result = await register(data);
+      await register(data);
       router.replace('/(auth)/login');
     } catch (error) {
       console.error('Register Failed: ', error);
