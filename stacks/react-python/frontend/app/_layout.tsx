@@ -1,12 +1,12 @@
-// app/_layout.tsx
-
-import { Stack } from 'expo-router';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { PaperProvider, MD3LightTheme } from 'react-native-paper';
-import { Provider } from 'react-redux';
+import { SnackbarProvider, useSnackbar } from '@/src/context/SnackbarContext';
 import { store } from '@/src/store';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { Stack } from 'expo-router';
+import React from 'react';
+import { PaperProvider, Snackbar, MD3LightTheme } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { colors } from '@/src/constants/theme';
+import { Provider } from 'react-redux';
 
 // Custom Paper theme — overrides default colors with our design system
 const theme = {
@@ -17,7 +17,6 @@ const theme = {
     background: colors.background,
     surface: colors.surface,
     error: colors.error,
-    // Fixes the black icon background on web inputs
     onSurfaceVariant: colors.textSecondary,
   },
 };
@@ -32,6 +31,18 @@ const queryClient = new QueryClient({
     },
   },
 });
+// Inner component that has access to the snackbar context
+function AppContent() {
+  const { visible, message, hideSnackbar } = useSnackbar();
+  return (
+    <>
+      <Stack screenOptions={{ headerShown: false }} />
+      <Snackbar visible={visible} onDismiss={hideSnackbar} duration={5000}>
+        {message}
+      </Snackbar>
+    </>
+  );
+}
 
 export default function RootLayout() {
   return (
@@ -39,8 +50,9 @@ export default function RootLayout() {
       <Provider store={store}>
         <SafeAreaProvider>
           <PaperProvider theme={theme}>
-            {/* headerShown: false removes the (auth) / (app) header from all screens */}
-            <Stack screenOptions={{ headerShown: false }} />
+            <SnackbarProvider>
+              <AppContent />
+            </SnackbarProvider>
           </PaperProvider>
         </SafeAreaProvider>
       </Provider>
