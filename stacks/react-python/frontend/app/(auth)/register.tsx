@@ -3,9 +3,12 @@
 import RegisterForm from '@/src/components/auth/RegisterForm';
 import { useRouter } from 'expo-router';
 import { register } from '@/src/services/authService';
+import { useSnackbar } from '@/src/context/SnackbarContext';
+
 export default function RegisterScreen() {
   // onSubmit  connect to the API
   const router = useRouter();
+  const { showSnackbar } = useSnackbar();
 
   const handleRegister = async (data: {
     first_name: string;
@@ -21,7 +24,7 @@ export default function RegisterScreen() {
       await register(data);
       router.replace('/(auth)/login');
     } catch (error) {
-      console.error('Register Failed: ', error);
+      showSnackbar('Regsiter Failed. Please try again later.');
     }
   };
 
