@@ -1,10 +1,8 @@
 import { Tabs, Redirect } from 'expo-router';
-import { useRole } from '@/src/hooks/useRole';
 import { House, Compass, User } from 'lucide-react-native';
 import { useAppSelector } from '@/src/store/hooks';
 
 export default function AppLayout() {
-  const { isAdmin } = useRole();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
@@ -29,7 +27,6 @@ export default function AppLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          href: isAdmin() ? undefined : null,
           title: 'Profile',
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
