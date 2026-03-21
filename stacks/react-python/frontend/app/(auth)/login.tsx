@@ -5,10 +5,12 @@ import { useAppDispatch } from '@/src/store/hooks';
 import { loginSuccess } from '@/src/store/slices/authSlice';
 import { login } from '@/src/services/authService';
 import LoginForm from '@/src/components/auth/LoginForm';
+import { useSnackbar } from '@/src/context/SnackbarContext';
 
 export default function LoginScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { showSnackbar } = useSnackbar();
 
   const handleLogin = async (data: { email: string; password: string }) => {
     try {
@@ -16,7 +18,7 @@ export default function LoginScreen() {
       dispatch(loginSuccess({ user: result.user, token: result.access }));
       router.replace('/(app)');
     } catch (error) {
-      console.error('Login failed:', error);
+      showSnackbar('Invalid email or password. Please try again.');
     }
   };
 

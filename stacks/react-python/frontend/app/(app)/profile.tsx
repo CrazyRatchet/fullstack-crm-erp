@@ -4,16 +4,18 @@ import { useAppSelector, useAppDispatch } from '@/src/store/hooks';
 import { logout as logoutAction } from '@/src/store/slices/authSlice';
 import { Button } from 'react-native-paper';
 import { colors, radius, spacing } from '@/src/constants/theme';
+import { useSnackbar } from '@/src/context/SnackbarContext';
 
 export default function ProfileScreen() {
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
+  const { showSnackbar } = useSnackbar();
   const handleLogout = async () => {
     try {
       await logout();
       dispatch(logoutAction());
     } catch (error) {
-      console.error('Logout Failed: ', error);
+      showSnackbar('Log out Failed. Please try again later.');
     }
   };
   return (
