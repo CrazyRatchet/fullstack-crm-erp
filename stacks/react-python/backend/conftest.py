@@ -2,7 +2,7 @@
 
 import pytest
 from django.contrib.auth import get_user_model
-
+from customers.models import Customer
 from tenants.models import Tenant
 
 User = get_user_model()
@@ -92,3 +92,17 @@ def authenticated_client(api_client, user):
     """
     api_client.force_authenticate(user=user)
     return api_client
+
+@pytest.fixture
+def customer(db, tenant):
+    """
+    Creates a test customer linked to the test tenant.
+    """
+    return Customer.objects.create(
+        name="Test Corp",
+        email="contact@testcorp.com",
+        phone="12345678",
+        address="123 Test St",
+        tenant=tenant,
+    )
+    
