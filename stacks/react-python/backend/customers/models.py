@@ -21,7 +21,6 @@ class Customer(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="customers",
     )
-    
     class Meta:
         db_table = "customers"
         unique_together = [["email", "tenant"]]

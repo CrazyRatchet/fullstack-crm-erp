@@ -4,6 +4,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from customers.models import Customer
 from tenants.models import Tenant
+from contacts.models import Contact
 
 User = get_user_model()
 
@@ -106,3 +107,17 @@ def customer(db, tenant):
         tenant=tenant,
     )
     
+@pytest.fixture
+def contact(db, tenant, customer):
+    """
+    Creates a test contact linked to the test tenant.
+    """
+    return Contact.objects.create(
+        first_name="Carlos",
+        last_name="Rodriguez",
+        email="carlitosrodriguito@example.com",
+        phone="123456789",
+        position="madmen",
+        tenant=tenant,
+        customer=customer
+    )
