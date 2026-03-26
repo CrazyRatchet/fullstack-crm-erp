@@ -56,6 +56,7 @@ LOCAL_APPS = [
     "tenants",  # Multi-tenancy
     "users",  # Custom user
     "customers", # Customers
+    "contacts", # Contact of the customers
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

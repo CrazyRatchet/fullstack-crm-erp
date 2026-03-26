@@ -1,8 +1,6 @@
 # customers/tests/test_views
 
 import pytest
-from customers.models import Customer
-from django.db import IntegrityError
 
 @pytest.mark.django_db
 def test_list_customers(authenticated_client):

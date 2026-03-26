@@ -54,6 +54,8 @@ class AuditLog(TimeStampedModel):
         # Customer actions
         CUSTOMER_UPDATED = 'customer_updated', 'Customer Updated'
         CUSTOMER_DEACTIVATED = 'customer_deactivated', 'Customer Deactivated'
+        # Contact action
+        CONTACT_UPDATED = 'contact_updated', 'Contact Updated'
 
     # Who performed the action (null if system or anonymous)
     user = models.ForeignKey(
