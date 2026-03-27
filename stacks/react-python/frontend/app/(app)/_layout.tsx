@@ -1,6 +1,7 @@
 import { Tabs, Redirect } from 'expo-router';
-import { House, Compass, User } from 'lucide-react-native';
+import { House, Compass, User, Users } from 'lucide-react-native';
 import { useAppSelector } from '@/src/store/hooks';
+import { colors } from '@/src/constants/theme';
 
 export default function AppLayout() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -9,7 +10,7 @@ export default function AppLayout() {
   }
 
   return (
-    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: '#007AFF' }}>
+    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.primary }}>
       <Tabs.Screen
         name="index"
         options={{
@@ -29,6 +30,13 @@ export default function AppLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="customers"
+        options={{
+          title: 'Customers',
+          tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
         }}
       />
     </Tabs>

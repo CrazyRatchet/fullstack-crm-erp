@@ -1,4 +1,4 @@
-// app/(auth)/login.tsx
+// app/(auth)/register.tsx
 
 import RegisterForm from '@/src/components/auth/RegisterForm';
 import { useRouter } from 'expo-router';
@@ -24,7 +24,7 @@ export default function RegisterScreen() {
       await register(data);
       router.replace('/(auth)/login');
     } catch (error) {
-      showSnackbar('Regsiter Failed. Please try again later.');
+      showSnackbar('Regsiter Failed. Please try again later.' + error);
     }
   };
 
