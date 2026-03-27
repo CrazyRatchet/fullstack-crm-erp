@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from customers.models import Customer
 from tenants.models import Tenant
 from contacts.models import Contact
+from leads.models import Lead
 
 User = get_user_model()
 
@@ -110,7 +111,7 @@ def customer(db, tenant):
 @pytest.fixture
 def contact(db, tenant, customer):
     """
-    Creates a test contact linked to the test tenant.
+    Creates a test contact linked to the test tenant and customer.
     """
     return Contact.objects.create(
         first_name="Carlos",
@@ -120,4 +121,17 @@ def contact(db, tenant, customer):
         position="madmen",
         tenant=tenant,
         customer=customer
+    )
+    
+@pytest.fixture
+def lead(db, tenant, customer, user):
+    """Creates a test lead linked to the test tenant, customer and user"""
+    return Lead.objects.create(
+        title="Sam Altan went",
+        value=5000.23,
+        stage="new",
+        expected_close_date="2027-02-11",
+        tenant=tenant,
+        customer=customer,
+        assigned_to=user
     )
