@@ -57,12 +57,7 @@ class ContactListCreateView(generics.ListCreateAPIView):
             return Response(
                 {
                     "message": "Contact registered succesfully",
-                    "contact": {
-                        "id": str(contact.id),
-                        "first_name": contact.first_name,
-                        "last_name": contact.last_name,
-                        "email": contact.email,
-                    },
+                    "contact": ContactSerializer(contact).data,
                 },
                 status=status.HTTP_201_CREATED,
             )

@@ -67,11 +67,7 @@ class CustomerListCreateView(generics.ListCreateAPIView):
             return Response(
                 {
                     "message": "Customer registered succesfully",
-                    "customer":{
-                        "id": str(customer.id),
-                        "name": customer.name,
-                        "email": customer.email,
-                    },
+                    "customer": CustomerSerializer(customer).data,
                 },
                 status=status.HTTP_201_CREATED,
             ) 
