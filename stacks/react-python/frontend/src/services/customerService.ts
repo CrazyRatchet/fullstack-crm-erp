@@ -40,6 +40,14 @@ export interface CreateCustomerData {
   address: string;
 }
 
+export interface CreateContactData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  position: string;
+}
+
 // -- FUNCTIONS --
 export const getCustomers = async (
   filters: CustomerFilters = {},
@@ -75,5 +83,21 @@ export const deactivateCustomer = async (id: string): Promise<void> => {
 
 export const getContacts = async (customerId: string): Promise<PaginatedResponse<Contact>> => {
   const response = await api.get(`/v1/customers/${customerId}/contacts/`);
+  return response.data;
+};
+
+export const createContact = async (
+  customerId: string,
+  data: CreateContactData,
+): Promise<Contact> => {
+  const response = await api.post(`/v1/customers/${customerId}/contacts/`, data);
+  return response.data;
+};
+
+export const updateContact = async (
+  contactId: string,
+  data: Partial<CreateContactData>,
+): Promise<Contact> => {
+  const response = await api.patch(`/v1/contacts/${contactId}/`, data);
   return response.data;
 };
