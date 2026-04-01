@@ -1,5 +1,5 @@
 import { Tabs, Redirect } from 'expo-router';
-import { House, Compass, User, Users } from 'lucide-react-native';
+import { House, Compass, User, Users, Kanban } from 'lucide-react-native';
 import { useAppSelector } from '@/src/store/hooks';
 import { colors } from '@/src/constants/theme';
 
@@ -37,6 +37,13 @@ export default function AppLayout() {
         options={{
           title: 'Customers',
           tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="leads"
+        options={{
+          title: 'Pipeline',
+          tabBarIcon: ({ color, size }) => <Kanban color={color} size={size} />,
         }}
       />
     </Tabs>
