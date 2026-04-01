@@ -11,14 +11,29 @@ export interface Lead {
   value: string;
   stage: LeadStage;
   expected_close_date: string;
-  customer: string;
-  assigned_to: string | null;
+  customer: {
+    id: string;
+    name: string;
+  };
+  assigned_to: {
+    id: string;
+    email: string;
+  } | null;
   created_at: string;
 }
 
 export interface LeadFilters {
   stage?: LeadStage;
   search?: string;
+}
+
+export interface CreateLeadData {
+  title: string;
+  value: string;
+  stage: LeadStage;
+  expected_close_date: string;
+  customer: string;
+  assigned_to?: string | null;
 }
 
 export const STAGE_LABELS: Record<LeadStage, string> = {
@@ -50,5 +65,15 @@ export const getLeads = async (filters: LeadFilters = {}): Promise<PaginatedResp
 
 export const getLead = async (id: string): Promise<Lead> => {
   const response = await api.get(`/v1/leads/${id}/`);
+  return response.data;
+};
+
+export const createLead = async (data: CreateLeadData): Promise<Lead> => {
+  const response = await api.post('/v1/leads/', data);
+  return response.data;
+};
+
+export const updateLead = async (id: string, data: Partial<CreateLeadData>): Promise<Lead> => {
+  const response = await api.patch(`/v1/leads/${id}/`, data);
   return response.data;
 };

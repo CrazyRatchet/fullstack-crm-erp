@@ -32,6 +32,11 @@ export default function LeadCard({ lead, onPress }: LeadCardProps) {
         elevation: 2,
       }}
     >
+      {/* Customer name */}
+      <Text className="text-xs mt-1" style={{ color: colors.textSecondary }}>
+        {typeof lead.customer === 'object' ? lead.customer.name : ''}
+      </Text>
+
       {/* Title */}
       <Text
         className="text-sm font-semibold mb-1"
