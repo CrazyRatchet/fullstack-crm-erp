@@ -4,6 +4,8 @@ import { useQueries } from '@tanstack/react-query';
 import { getLeads, LeadStage, STAGES, STAGE_LABELS } from '@/src/services/leadService';
 import LeadCard from '@/src/components/leads/LeadCard';
 import { colors } from '@/src/constants/theme';
+import { Chip } from 'react-native-paper';
+import { useState } from 'react';
 
 const STAGE_COLORS: Record<LeadStage, string> = {
   new: '#6366F1',
@@ -15,10 +17,13 @@ const STAGE_COLORS: Record<LeadStage, string> = {
 };
 
 export default function LeadPipelineScreen() {
+  const [activeStage, setActiveStage] = useState<LeadStage | undefined>(undefined);
   const results = useQueries({
     queries: STAGES.map((stage) => ({
-      queryKey: ['leads', stage],
+      queryKey: ['leads', stage, activeStage],
       queryFn: () => getLeads({ stage }),
+      // Only fetch the active stage or all if none selected
+      enabled: activeStage === undefined || activeStage === stage,
     })),
   });
 
@@ -36,6 +41,26 @@ export default function LeadPipelineScreen() {
           {isLoading ? 'Loading...' : `${totalLeads} leads total`}
         </Text>
       </View>
+
+      {/* Filters */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}
+        className="flex-grow-0"
+      >
+        {STAGES.map((stage) => (
+          <Chip
+            key={stage}
+            selected={activeStage === stage}
+            onPress={() => setActiveStage((prev) => (prev === stage ? undefined : stage))}
+            style={{ backgroundColor: colors.surface }}
+            selectedColor={STAGE_COLORS[stage]}
+          >
+            {STAGE_LABELS[stage]}
+          </Chip>
+        ))}
+      </ScrollView>
 
       {/* Kanban board — horizontal scroll */}
       <ScrollView
