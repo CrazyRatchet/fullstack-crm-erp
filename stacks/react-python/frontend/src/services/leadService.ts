@@ -45,6 +45,15 @@ export const STAGE_LABELS: Record<LeadStage, string> = {
   lost: 'Lost',
 };
 
+export const STAGE_COLORS: Record<LeadStage, string> = {
+  new: '#6366F1',
+  contacted: '#3B82F6',
+  proposal_sent: '#F59E0B',
+  negotiation: '#8B5CF6',
+  won: '#10B981',
+  lost: '#EF4444',
+};
+
 export const STAGES: LeadStage[] = [
   'new',
   'contacted',
