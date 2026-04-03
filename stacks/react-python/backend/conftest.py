@@ -2,8 +2,10 @@
 
 import pytest
 from django.contrib.auth import get_user_model
-
+from customers.models import Customer
 from tenants.models import Tenant
+from contacts.models import Contact
+from leads.models import Lead
 
 User = get_user_model()
 
@@ -92,3 +94,44 @@ def authenticated_client(api_client, user):
     """
     api_client.force_authenticate(user=user)
     return api_client
+
+@pytest.fixture
+def customer(db, tenant):
+    """
+    Creates a test customer linked to the test tenant.
+    """
+    return Customer.objects.create(
+        name="Test Corp",
+        email="contact@testcorp.com",
+        phone="12345678",
+        address="123 Test St",
+        tenant=tenant,
+    )
+    
+@pytest.fixture
+def contact(db, tenant, customer):
+    """
+    Creates a test contact linked to the test tenant and customer.
+    """
+    return Contact.objects.create(
+        first_name="Carlos",
+        last_name="Rodriguez",
+        email="carlitosrodriguito@example.com",
+        phone="123456789",
+        position="madmen",
+        tenant=tenant,
+        customer=customer
+    )
+    
+@pytest.fixture
+def lead(db, tenant, customer, user):
+    """Creates a test lead linked to the test tenant, customer and user"""
+    return Lead.objects.create(
+        title="Sam Altan went",
+        value=5000.23,
+        stage="new",
+        expected_close_date="2027-02-11",
+        tenant=tenant,
+        customer=customer,
+        assigned_to=user
+    )

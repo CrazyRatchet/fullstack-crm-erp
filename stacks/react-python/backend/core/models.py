@@ -50,7 +50,14 @@ class AuditLog(TimeStampedModel):
         USER_CREATED = 'user_created', 'User Created'
         USER_UPDATED = 'user_updated', 'User Updated'
         USER_DEACTIVATED = 'user_deactivated', 'User Deactivated'
-        ROLE_CHANGED = 'role_changed', 'Role Changed'
+        ROLE_CHANGED = 'role_changed', 'Role Changed',
+        # Customer actions
+        CUSTOMER_UPDATED = 'customer_updated', 'Customer Updated'
+        CUSTOMER_DEACTIVATED = 'customer_deactivated', 'Customer Deactivated'
+        # Contact action
+        CONTACT_UPDATED = 'contact_updated', 'Contact Updated'
+        # Lead action
+        LEAD_UPDATED = 'lead_updated', 'Lead Updated'
 
     # Who performed the action (null if system or anonymous)
     user = models.ForeignKey(

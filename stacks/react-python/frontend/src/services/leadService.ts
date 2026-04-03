@@ -1,0 +1,88 @@
+// src/services/leadService.ts
+import api from '@/src/api/axios';
+import { PaginatedResponse } from '@/src/services/customerService';
+
+// -- TYPES --
+export type LeadStage = 'new' | 'contacted' | 'proposal_sent' | 'negotiation' | 'won' | 'lost';
+
+export interface Lead {
+  id: string;
+  title: string;
+  value: string;
+  stage: LeadStage;
+  expected_close_date: string;
+  customer: {
+    id: string;
+    name: string;
+  };
+  assigned_to: {
+    id: string;
+    email: string;
+  } | null;
+  created_at: string;
+}
+
+export interface LeadFilters {
+  stage?: LeadStage;
+  search?: string;
+}
+
+export interface CreateLeadData {
+  title: string;
+  value: string;
+  stage: LeadStage;
+  expected_close_date: string;
+  customer: string;
+  assigned_to?: string | null;
+}
+
+export const STAGE_LABELS: Record<LeadStage, string> = {
+  new: 'New',
+  contacted: 'Contacted',
+  proposal_sent: 'Proposal Sent',
+  negotiation: 'Negotiation',
+  won: 'Won',
+  lost: 'Lost',
+};
+
+export const STAGE_COLORS: Record<LeadStage, string> = {
+  new: '#6366F1',
+  contacted: '#3B82F6',
+  proposal_sent: '#F59E0B',
+  negotiation: '#8B5CF6',
+  won: '#10B981',
+  lost: '#EF4444',
+};
+
+export const STAGES: LeadStage[] = [
+  'new',
+  'contacted',
+  'proposal_sent',
+  'negotiation',
+  'won',
+  'lost',
+];
+
+// -- FUNCTIONS --
+export const getLeads = async (filters: LeadFilters = {}): Promise<PaginatedResponse<Lead>> => {
+  const params = new URLSearchParams();
+  if (filters.stage) params.append('stage', filters.stage);
+  if (filters.search) params.append('search', filters.search);
+  const response = await api.get(`/v1/leads/?${params.toString()}`);
+  return response.data;
+};
+
+export const getLead = async (id: string): Promise<Lead> => {
+  const response = await api.get(`/v1/leads/${id}/`);
+  return response.data;
+};
+
+export const createLead = async (data: CreateLeadData): Promise<Lead> => {
+  const response = await api.post('/v1/leads/', data);
+  return response.data;
+};
+
+export const updateLead = async (id: string, data: Partial<CreateLeadData>): Promise<Lead> => {
+  const response = await api.patch(`/v1/leads/${id}/`, data);
+  return response.data;
+};

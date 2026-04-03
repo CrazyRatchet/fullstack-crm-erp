@@ -52,9 +52,13 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "core",  # Shared utilities — to be created
-    "tenants",  # Multi-tenancy — to be created
-    "users",  # Custom user — already exists
+    "core",  # Shared utilities
+    "tenants",  # Multi-tenancy
+    "users",  # Custom user
+    "customers", # Customers
+    "contacts", # Contact of the customers
+    "leads", # Leads
+    "dashboard", # Dashboard
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
