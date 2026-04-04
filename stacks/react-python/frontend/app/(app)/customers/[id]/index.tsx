@@ -1,5 +1,5 @@
 // app/(app)/customers/[id]/index.tsx
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, useWindowDimensions } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Dialog, Portal } from 'react-native-paper';
@@ -14,6 +14,8 @@ export default function CustomerDetailScreen() {
   const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const { width } = useWindowDimensions();
+  const isWeb = width >= 768;
 
   const { data: customer, isLoading: loadingCustomer } = useQuery({
     queryKey: ['customer', id],
@@ -63,7 +65,15 @@ export default function CustomerDetailScreen() {
 
   return (
     <ScrollView className="flex-1 bg-gray-50">
-      <View className="p-4 pb-10">
+      <View
+        style={{
+          padding: 16,
+          paddingBottom: 40,
+          maxWidth: isWeb ? 720 : '100%',
+          width: '100%',
+          alignSelf: 'center',
+        }}
+      >
         {/* Customer info card */}
         <View className="bg-white rounded-xl p-4 border border-gray-200 mb-4">
           {/* Name + badge */}

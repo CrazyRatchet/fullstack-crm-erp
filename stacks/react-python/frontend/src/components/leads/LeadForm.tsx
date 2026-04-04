@@ -1,5 +1,12 @@
 // src/components/leads/LeadForm.tsx
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  useWindowDimensions,
+} from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -56,6 +63,9 @@ export default function LeadForm({
   const [stageMenuVisible, setStageMenuVisible] = useState(false);
   const [customerMenuVisible, setCustomerMenuVisible] = useState(false);
 
+  const { width } = useWindowDimensions();
+  const isWeb = width >= 768;
+
   const { data: customersData } = useQuery({
     queryKey: ['customers'],
     queryFn: () => getCustomers({ is_active: true }),
@@ -94,187 +104,217 @@ export default function LeadForm({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
-      <ScrollView
-        contentContainerStyle={{ padding: spacing.md }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={{ gap: spacing.sm }}>
-          {/* Title */}
-          <Controller
-            control={control}
-            name="title"
-            render={({ field: { onChange, onBlur, value } }) => (
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        {/* Outer container — centers on web, fullscreen on mobile */}
+        <View
+          style={{
+            flex: 1,
+            alignItems: isWeb ? 'center' : 'stretch',
+            backgroundColor: colors.background,
+            padding: spacing.md,
+          }}
+        >
+          {/* Card */}
+          <View
+            style={{
+              width: isWeb ? 520 : '100%',
+              backgroundColor: colors.surface,
+              borderRadius: radius.lg,
+              padding: isWeb ? spacing.xl : spacing.md,
+              ...(isWeb && {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 16,
+                elevation: 4,
+              }),
+            }}
+          >
+            <View style={{ gap: spacing.sm }}>
+              {/* Title */}
+              <Controller
+                control={control}
+                name="title"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <FieldLabel label="Title *" hasError={!!errors.title} />
+                    <TextInput
+                      mode="outlined"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      error={!!errors.title}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                    />
+                  </View>
+                )}
+              />
+              {errors.title && (
+                <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
+                  {errors.title.message}
+                </Text>
+              )}
+
+              {/* Value */}
+              <Controller
+                control={control}
+                name="value"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <FieldLabel label="Value (USD) *" hasError={!!errors.value} />
+                    <TextInput
+                      mode="outlined"
+                      keyboardType="decimal-pad"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      error={!!errors.value}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                      left={<TextInput.Affix text="$" />}
+                    />
+                  </View>
+                )}
+              />
+              {errors.value && (
+                <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
+                  {errors.value.message}
+                </Text>
+              )}
+
+              {/* Stage selector */}
               <View>
-                <FieldLabel label="Title *" hasError={!!errors.title} />
-                <TextInput
-                  mode="outlined"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  error={!!errors.title}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                />
-              </View>
-            )}
-          />
-          {errors.title && (
-            <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-              {errors.title.message}
-            </Text>
-          )}
-
-          {/* Value */}
-          <Controller
-            control={control}
-            name="value"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View>
-                <FieldLabel label="Value (USD) *" hasError={!!errors.value} />
-                <TextInput
-                  mode="outlined"
-                  keyboardType="decimal-pad"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  error={!!errors.value}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                  left={<TextInput.Affix text="$" />}
-                />
-              </View>
-            )}
-          />
-          {errors.value && (
-            <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-              {errors.value.message}
-            </Text>
-          )}
-
-          {/* Stage selector */}
-          <View>
-            <FieldLabel label="Stage *" hasError={!!errors.stage} />
-            <Menu
-              visible={stageMenuVisible}
-              onDismiss={() => setStageMenuVisible(false)}
-              anchor={
-                <TextInput
-                  mode="outlined"
-                  value={STAGE_LABELS[selectedStage]}
-                  editable={false}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                  right={
-                    <TextInput.Icon icon="chevron-down" onPress={() => setStageMenuVisible(true)} />
-                  }
-                  onPressIn={() => setStageMenuVisible(true)}
-                />
-              }
-            >
-              {STAGES.map((stage) => (
-                <Menu.Item
-                  key={stage}
-                  onPress={() => {
-                    setValue('stage', stage);
-                    setStageMenuVisible(false);
-                  }}
-                  title={STAGE_LABELS[stage]}
-                />
-              ))}
-            </Menu>
-          </View>
-
-          {/* Expected close date */}
-          <Controller
-            control={control}
-            name="expected_close_date"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View>
-                <FieldLabel label="Expected Close Date *" hasError={!!errors.expected_close_date} />
-                <TextInput
-                  mode="outlined"
-                  placeholder="YYYY-MM-DD"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  error={!!errors.expected_close_date}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                />
-              </View>
-            )}
-          />
-          {errors.expected_close_date && (
-            <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-              {errors.expected_close_date.message}
-            </Text>
-          )}
-
-          {/* Customer selector */}
-          <View>
-            <FieldLabel label="Customer *" hasError={!!errors.customer} />
-            <Menu
-              visible={customerMenuVisible}
-              onDismiss={() => setCustomerMenuVisible(false)}
-              anchor={
-                <TextInput
-                  mode="outlined"
-                  value={selectedCustomerName ?? ''}
-                  placeholder="Select a customer"
-                  editable={false}
-                  error={!!errors.customer}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                  right={
-                    <TextInput.Icon
-                      icon="chevron-down"
-                      onPress={() => setCustomerMenuVisible(true)}
+                <FieldLabel label="Stage *" hasError={!!errors.stage} />
+                <Menu
+                  visible={stageMenuVisible}
+                  onDismiss={() => setStageMenuVisible(false)}
+                  anchor={
+                    <TextInput
+                      mode="outlined"
+                      value={STAGE_LABELS[selectedStage]}
+                      editable={false}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                      right={
+                        <TextInput.Icon
+                          icon="chevron-down"
+                          onPress={() => setStageMenuVisible(true)}
+                        />
+                      }
+                      onPressIn={() => setStageMenuVisible(true)}
                     />
                   }
-                  onPressIn={() => setCustomerMenuVisible(true)}
-                />
-              }
-            >
-              {customersData?.results.map((customer) => (
-                <Menu.Item
-                  key={customer.id}
-                  onPress={() => {
-                    setValue('customer', customer.id);
-                    setCustomerMenuVisible(false);
-                  }}
-                  title={customer.name}
-                />
-              ))}
-            </Menu>
-          </View>
-          {errors.customer && (
-            <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-              {errors.customer.message}
-            </Text>
-          )}
+                >
+                  {STAGES.map((stage) => (
+                    <Menu.Item
+                      key={stage}
+                      onPress={() => {
+                        setValue('stage', stage);
+                        setStageMenuVisible(false);
+                      }}
+                      title={STAGE_LABELS[stage]}
+                    />
+                  ))}
+                </Menu>
+              </View>
 
-          {/* Submit button */}
-          <Button
-            mode="contained"
-            onPress={handleSubmit(onSubmit)}
-            loading={isLoading || isSubmitting}
-            disabled={isLoading || isSubmitting}
-            buttonColor={colors.primary}
-            style={{ marginTop: spacing.md, borderRadius: radius.sm }}
-            contentStyle={{ paddingVertical: 6 }}
-          >
-            {submitLabel}
-          </Button>
+              {/* Expected close date */}
+              <Controller
+                control={control}
+                name="expected_close_date"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <FieldLabel
+                      label="Expected Close Date *"
+                      hasError={!!errors.expected_close_date}
+                    />
+                    <TextInput
+                      mode="outlined"
+                      placeholder="YYYY-MM-DD"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      error={!!errors.expected_close_date}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                    />
+                  </View>
+                )}
+              />
+              {errors.expected_close_date && (
+                <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
+                  {errors.expected_close_date.message}
+                </Text>
+              )}
+
+              {/* Customer selector */}
+              <View>
+                <FieldLabel label="Customer *" hasError={!!errors.customer} />
+                <Menu
+                  visible={customerMenuVisible}
+                  onDismiss={() => setCustomerMenuVisible(false)}
+                  anchor={
+                    <TextInput
+                      mode="outlined"
+                      value={selectedCustomerName ?? ''}
+                      placeholder="Select a customer"
+                      editable={false}
+                      error={!!errors.customer}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                      right={
+                        <TextInput.Icon
+                          icon="chevron-down"
+                          onPress={() => setCustomerMenuVisible(true)}
+                        />
+                      }
+                      onPressIn={() => setCustomerMenuVisible(true)}
+                    />
+                  }
+                >
+                  {customersData?.results.map((customer) => (
+                    <Menu.Item
+                      key={customer.id}
+                      onPress={() => {
+                        setValue('customer', customer.id);
+                        setCustomerMenuVisible(false);
+                      }}
+                      title={customer.name}
+                    />
+                  ))}
+                </Menu>
+              </View>
+              {errors.customer && (
+                <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
+                  {errors.customer.message}
+                </Text>
+              )}
+
+              {/* Submit button */}
+              <Button
+                mode="contained"
+                onPress={handleSubmit(onSubmit)}
+                loading={isLoading || isSubmitting}
+                disabled={isLoading || isSubmitting}
+                buttonColor={colors.primary}
+                style={{ marginTop: spacing.md, borderRadius: radius.sm }}
+                contentStyle={{ paddingVertical: 6 }}
+              >
+                {submitLabel}
+              </Button>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

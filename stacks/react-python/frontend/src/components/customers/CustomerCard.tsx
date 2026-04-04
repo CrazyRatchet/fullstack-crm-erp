@@ -1,7 +1,8 @@
 // src/components/customers/CustomerCard.tsx
 import { View, Text, TouchableOpacity } from 'react-native';
-import { colors, spacing, radius } from '@/src/constants/theme';
+import { colors } from '@/src/constants/theme';
 import { Customer } from '@/src/services/customerService';
+import { Mail, Phone } from 'lucide-react-native';
 
 interface CustomerCardProps {
   customer: Customer;
@@ -12,67 +13,58 @@ export default function CustomerCard({ customer, onPress }: CustomerCardProps) {
   return (
     <TouchableOpacity
       onPress={() => onPress(customer)}
+      className="bg-white rounded-xl p-4 mb-2 border border-gray-100 active:opacity-80"
       style={{
-        backgroundColor: colors.surface,
-        borderRadius: radius.md,
-        padding: spacing.md,
-        marginBottom: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        // Shadow for iOS/web
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0.06,
         shadowRadius: 4,
         elevation: 2,
       }}
     >
       {/* Header row — name + active badge */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: spacing.xs,
-        }}
-      >
+      <View className="flex-row justify-between items-center mb-2">
         <Text
-          style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary, flex: 1 }}
+          className="text-base font-semibold flex-1 mr-2"
+          style={{ color: colors.textPrimary }}
           numberOfLines={1}
         >
           {customer.name}
         </Text>
-        {/* Active/Inactive badge */}
         <View
-          style={{
-            paddingHorizontal: spacing.sm,
-            paddingVertical: 2,
-            borderRadius: radius.full,
-            backgroundColor: customer.is_active ? '#D1FAE5' : '#FEE2E2',
-          }}
+          className="px-2 py-0.5 rounded-full"
+          style={{ backgroundColor: customer.is_active ? '#D1FAE5' : '#FEE2E2' }}
         >
           <Text
-            style={{
-              fontSize: 11,
-              fontWeight: '600',
-              color: customer.is_active ? colors.success : colors.error,
-            }}
+            className="text-xs font-semibold"
+            style={{ color: customer.is_active ? colors.success : colors.error }}
           >
             {customer.is_active ? 'Active' : 'Inactive'}
           </Text>
         </View>
       </View>
 
+      {/* Divider */}
+      <View className="border-t border-gray-100 mb-2" />
+
       {/* Email */}
       {customer.email ? (
-        <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 2 }}>
-          {customer.email}
-        </Text>
+        <View className="flex-row items-center gap-2 mb-1">
+          <Mail size={12} color={colors.textSecondary} />
+          <Text className="text-xs" style={{ color: colors.textSecondary }}>
+            {customer.email}
+          </Text>
+        </View>
       ) : null}
 
       {/* Phone */}
       {customer.phone ? (
-        <Text style={{ fontSize: 13, color: colors.textSecondary }}>{customer.phone}</Text>
+        <View className="flex-row items-center gap-2 mb-1">
+          <Phone size={12} color={colors.textSecondary} />
+          <Text className="text-xs" style={{ color: colors.textSecondary }}>
+            {customer.phone}
+          </Text>
+        </View>
       ) : null}
     </TouchableOpacity>
   );

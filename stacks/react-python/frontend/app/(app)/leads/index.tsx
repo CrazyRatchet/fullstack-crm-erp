@@ -1,24 +1,32 @@
 // app/(app)/leads/index.tsx
 import { View, Text, ScrollView, FlatList } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { getLeads, LeadStage, STAGES, STAGE_LABELS, Lead } from '@/src/services/leadService';
+import {
+  getLeads,
+  LeadStage,
+  STAGES,
+  STAGE_LABELS,
+  STAGE_COLORS,
+  Lead,
+} from '@/src/services/leadService';
 import LeadCard from '@/src/components/leads/LeadCard';
 import { colors } from '@/src/constants/theme';
 import { Chip, FAB } from 'react-native-paper';
 import { useState } from 'react';
 import { router } from 'expo-router';
 
-const STAGE_COLORS: Record<LeadStage, string> = {
-  new: '#6366F1',
-  contacted: '#3B82F6',
-  proposal_sent: '#F59E0B',
-  negotiation: '#8B5CF6',
-  won: '#10B981',
-  lost: '#EF4444',
+const formatValue = (value: string) => {
+  const num = parseFloat(value);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+  }).format(num);
 };
 
 export default function LeadPipelineScreen() {
   const [activeStage, setActiveStage] = useState<LeadStage | undefined>(undefined);
+
   const { data, isLoading } = useQuery({
     queryKey: ['leads'],
     queryFn: () => getLeads(),
@@ -35,6 +43,13 @@ export default function LeadPipelineScreen() {
 
   const totalLeads = data?.count ?? 0;
 
+  // Total pipeline value
+  const totalValue = data?.results.reduce((acc, lead) => acc + parseFloat(lead.value), 0) ?? 0;
+
+  // Active leads (not won or lost)
+  const activeLeads =
+    data?.results.filter((lead) => lead.stage !== 'won' && lead.stage !== 'lost').length ?? 0;
+
   return (
     <View className="flex-1 bg-gray-50">
       {/* Header */}
@@ -47,12 +62,45 @@ export default function LeadPipelineScreen() {
         </Text>
       </View>
 
-      {/* Filters */}
+      {/* Metric cards */}
+      <View className="flex-row px-4 gap-3 mb-3">
+        {/* Total leads */}
+        <View className="flex-1 bg-white rounded-xl p-3 border border-gray-100">
+          <Text className="text-xs font-medium" style={{ color: colors.textSecondary }}>
+            Total Leads
+          </Text>
+          <Text className="text-2xl font-bold mt-1" style={{ color: colors.primary }}>
+            {isLoading ? '...' : totalLeads}
+          </Text>
+        </View>
+
+        {/* Active leads */}
+        <View className="flex-1 bg-white rounded-xl p-3 border border-gray-100">
+          <Text className="text-xs font-medium" style={{ color: colors.textSecondary }}>
+            Active
+          </Text>
+          <Text className="text-2xl font-bold mt-1" style={{ color: colors.warning }}>
+            {isLoading ? '...' : activeLeads}
+          </Text>
+        </View>
+
+        {/* Pipeline value */}
+        <View className="flex-1 bg-white rounded-xl p-3 border border-gray-100">
+          <Text className="text-xs font-medium" style={{ color: colors.textSecondary }}>
+            Value
+          </Text>
+          <Text className="text-lg font-bold mt-1" style={{ color: colors.success }}>
+            {isLoading ? '...' : formatValue(String(totalValue))}
+          </Text>
+        </View>
+      </View>
+
+      {/* Stage filters */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={{ flexGrow: 0 }}
         contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}
-        className="flex-grow-0"
       >
         {STAGES.map((stage) => (
           <Chip
@@ -67,7 +115,7 @@ export default function LeadPipelineScreen() {
         ))}
       </ScrollView>
 
-      {/* Kanban board — horizontal scroll */}
+      {/* Kanban board */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -130,11 +178,13 @@ export default function LeadPipelineScreen() {
           },
         )}
       </ScrollView>
+
       <FAB
         icon="plus"
         label="New Lead"
         onPress={() => router.push('/(app)/leads/new')}
         style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: colors.primary }}
+        color="#ffffff"
       />
     </View>
   );

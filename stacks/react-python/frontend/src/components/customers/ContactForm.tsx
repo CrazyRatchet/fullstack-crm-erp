@@ -1,5 +1,12 @@
 // src/components/customers/ContactForm.tsx
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  useWindowDimensions,
+} from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -27,7 +34,6 @@ interface ContactFormProps {
   submitLabel?: string;
 }
 
-// Reusable field label — same pattern as other forms
 const FieldLabel = ({ label, hasError }: { label: string; hasError: boolean }) => (
   <Text
     style={{
@@ -47,6 +53,9 @@ export default function ContactForm({
   defaultValues,
   submitLabel = 'Save',
 }: ContactFormProps) {
+  const { width } = useWindowDimensions();
+  const isWeb = width >= 768;
+
   const {
     control,
     handleSubmit,
@@ -67,156 +76,180 @@ export default function ContactForm({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
-      <ScrollView
-        contentContainerStyle={{ padding: spacing.md }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={{ gap: spacing.sm }}>
-          {/* First name */}
-          <Controller
-            control={control}
-            name="first_name"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View>
-                <FieldLabel label="First name *" hasError={!!errors.first_name} />
-                <TextInput
-                  mode="outlined"
-                  autoCapitalize="words"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  error={!!errors.first_name}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                />
-              </View>
-            )}
-          />
-          {errors.first_name && (
-            <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-              {errors.first_name.message}
-            </Text>
-          )}
-
-          {/* Last name */}
-          <Controller
-            control={control}
-            name="last_name"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View>
-                <FieldLabel label="Last name *" hasError={!!errors.last_name} />
-                <TextInput
-                  mode="outlined"
-                  autoCapitalize="words"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  error={!!errors.last_name}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                />
-              </View>
-            )}
-          />
-          {errors.last_name && (
-            <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-              {errors.last_name.message}
-            </Text>
-          )}
-
-          {/* Email */}
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View>
-                <FieldLabel label="Email" hasError={!!errors.email} />
-                <TextInput
-                  mode="outlined"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  error={!!errors.email}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                />
-              </View>
-            )}
-          />
-          {errors.email && (
-            <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
-              {errors.email.message}
-            </Text>
-          )}
-
-          {/* Phone */}
-          <Controller
-            control={control}
-            name="phone"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View>
-                <FieldLabel label="Phone" hasError={!!errors.phone} />
-                <TextInput
-                  mode="outlined"
-                  keyboardType="phone-pad"
-                  autoComplete="tel"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  error={!!errors.phone}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                />
-              </View>
-            )}
-          />
-
-          {/* Position */}
-          <Controller
-            control={control}
-            name="position"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View>
-                <FieldLabel label="Position" hasError={!!errors.position} />
-                <TextInput
-                  mode="outlined"
-                  autoCapitalize="words"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  error={!!errors.position}
-                  outlineColor={colors.border}
-                  activeOutlineColor={colors.primary}
-                  label=""
-                  style={{ backgroundColor: colors.surface }}
-                />
-              </View>
-            )}
-          />
-
-          {/* Submit button */}
-          <Button
-            mode="contained"
-            onPress={handleSubmit(onSubmit)}
-            loading={isLoading || isSubmitting}
-            disabled={isLoading || isSubmitting}
-            buttonColor={colors.primary}
-            style={{ marginTop: spacing.md, borderRadius: radius.sm }}
-            contentStyle={{ paddingVertical: 6 }}
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        {/* Outer container — centers on web, fullscreen on mobile */}
+        <View
+          style={{
+            flex: 1,
+            alignItems: isWeb ? 'center' : 'stretch',
+            backgroundColor: colors.background,
+            padding: spacing.md,
+          }}
+        >
+          {/* Card */}
+          <View
+            style={{
+              width: isWeb ? 520 : '100%',
+              backgroundColor: colors.surface,
+              borderRadius: radius.lg,
+              padding: isWeb ? spacing.xl : spacing.md,
+              ...(isWeb && {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 16,
+                elevation: 4,
+              }),
+            }}
           >
-            {submitLabel}
-          </Button>
+            <View style={{ gap: spacing.sm }}>
+              {/* First name */}
+              <Controller
+                control={control}
+                name="first_name"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <FieldLabel label="First name *" hasError={!!errors.first_name} />
+                    <TextInput
+                      mode="outlined"
+                      autoCapitalize="words"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      error={!!errors.first_name}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                    />
+                  </View>
+                )}
+              />
+              {errors.first_name && (
+                <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
+                  {errors.first_name.message}
+                </Text>
+              )}
+
+              {/* Last name */}
+              <Controller
+                control={control}
+                name="last_name"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <FieldLabel label="Last name *" hasError={!!errors.last_name} />
+                    <TextInput
+                      mode="outlined"
+                      autoCapitalize="words"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      error={!!errors.last_name}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                    />
+                  </View>
+                )}
+              />
+              {errors.last_name && (
+                <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
+                  {errors.last_name.message}
+                </Text>
+              )}
+
+              {/* Email */}
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <FieldLabel label="Email" hasError={!!errors.email} />
+                    <TextInput
+                      mode="outlined"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      error={!!errors.email}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                    />
+                  </View>
+                )}
+              />
+              {errors.email && (
+                <Text style={{ color: colors.error, fontSize: 12, marginTop: -4 }}>
+                  {errors.email.message}
+                </Text>
+              )}
+
+              {/* Phone */}
+              <Controller
+                control={control}
+                name="phone"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <FieldLabel label="Phone" hasError={!!errors.phone} />
+                    <TextInput
+                      mode="outlined"
+                      keyboardType="phone-pad"
+                      autoComplete="tel"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      error={!!errors.phone}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                    />
+                  </View>
+                )}
+              />
+
+              {/* Position */}
+              <Controller
+                control={control}
+                name="position"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <FieldLabel label="Position" hasError={!!errors.position} />
+                    <TextInput
+                      mode="outlined"
+                      autoCapitalize="words"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      error={!!errors.position}
+                      outlineColor={colors.border}
+                      activeOutlineColor={colors.primary}
+                      label=""
+                      style={{ backgroundColor: colors.surface }}
+                    />
+                  </View>
+                )}
+              />
+
+              {/* Submit button */}
+              <Button
+                mode="contained"
+                onPress={handleSubmit(onSubmit)}
+                loading={isLoading || isSubmitting}
+                disabled={isLoading || isSubmitting}
+                buttonColor={colors.primary}
+                style={{ marginTop: spacing.md, borderRadius: radius.sm }}
+                contentStyle={{ paddingVertical: 6 }}
+              >
+                {submitLabel}
+              </Button>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

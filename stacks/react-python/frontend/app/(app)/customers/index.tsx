@@ -1,16 +1,18 @@
 // app/(app)/customers/index.tsx
 import { useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, useWindowDimensions } from 'react-native';
 import { Searchbar, FAB, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getCustomers, Customer } from '@/src/services/customerService';
 import CustomerCard from '@/src/components/customers/CustomerCard';
-import { colors, spacing, radius } from '@/src/constants/theme';
+import { colors } from '@/src/constants/theme';
 
 export default function CustomerListScreen() {
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState<boolean | undefined>(undefined);
+  const { width } = useWindowDimensions();
+  const isWeb = width >= 768;
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['customers', search, activeFilter],
@@ -18,138 +20,126 @@ export default function CustomerListScreen() {
   });
 
   const handleFilterPress = (value: boolean | undefined) => {
-    // Toggle filter off if already selected
     setActiveFilter((prev) => (prev === value ? undefined : value));
   };
 
+  const totalCustomers = data?.count ?? 0;
+  const activeCustomers = data?.results.filter((c) => c.is_active).length ?? 0;
+  const inactiveCustomers = data?.results.filter((c) => !c.is_active).length ?? 0;
+
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-gray-50">
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Customers</Text>
-        <Text style={styles.subtitle}>
-          {data?.count ?? 0} {data?.count === 1 ? 'customer' : 'customers'}
+      <View className="px-4 pt-6 pb-2">
+        <Text className="text-3xl font-bold" style={{ color: colors.textPrimary }}>
+          Customers
+        </Text>
+        <Text className="text-sm mt-0.5" style={{ color: colors.textSecondary }}>
+          Manage your customer relationships
         </Text>
       </View>
 
-      {/* Search bar */}
-      <Searchbar
-        placeholder="Search customers..."
-        value={search}
-        onChangeText={setSearch}
-        style={styles.searchbar}
-        inputStyle={{ color: colors.textPrimary }}
-      />
+      {/* Centered content container for web */}
+      <View style={{ flex: 1, maxWidth: isWeb ? 800 : '100%', width: '100%', alignSelf: 'center' }}>
+        {/* Metric cards */}
+        <View className="flex-row px-4 gap-3 mb-3">
+          <View className="flex-1 bg-white rounded-xl p-3 border border-gray-100">
+            <Text className="text-xs font-medium" style={{ color: colors.textSecondary }}>
+              Total
+            </Text>
+            <Text className="text-2xl font-bold mt-1" style={{ color: colors.primary }}>
+              {isLoading ? '...' : totalCustomers}
+            </Text>
+          </View>
+          <View className="flex-1 bg-white rounded-xl p-3 border border-gray-100">
+            <Text className="text-xs font-medium" style={{ color: colors.textSecondary }}>
+              Active
+            </Text>
+            <Text className="text-2xl font-bold mt-1" style={{ color: colors.success }}>
+              {isLoading ? '...' : activeCustomers}
+            </Text>
+          </View>
+          <View className="flex-1 bg-white rounded-xl p-3 border border-gray-100">
+            <Text className="text-xs font-medium" style={{ color: colors.textSecondary }}>
+              Inactive
+            </Text>
+            <Text className="text-2xl font-bold mt-1" style={{ color: colors.error }}>
+              {isLoading ? '...' : inactiveCustomers}
+            </Text>
+          </View>
+        </View>
 
-      {/* Filters */}
-      <View style={styles.filters}>
-        <Chip
-          selected={activeFilter === true}
-          onPress={() => handleFilterPress(true)}
-          style={styles.chip}
-          selectedColor={colors.success}
-        >
-          Active
-        </Chip>
-        <Chip
-          selected={activeFilter === false}
-          onPress={() => handleFilterPress(false)}
-          style={styles.chip}
-          selectedColor={colors.error}
-        >
-          Inactive
-        </Chip>
+        {/* Search bar */}
+        <Searchbar
+          placeholder="Search customers..."
+          value={search}
+          onChangeText={setSearch}
+          style={{
+            marginHorizontal: 16,
+            marginBottom: 8,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+          }}
+          inputStyle={{ color: colors.textPrimary }}
+        />
+
+        {/* Filters */}
+        <View className="flex-row px-4 gap-2 mb-2">
+          <Chip
+            selected={activeFilter === true}
+            onPress={() => handleFilterPress(true)}
+            style={{ backgroundColor: colors.surface }}
+            selectedColor={colors.success}
+          >
+            Active
+          </Chip>
+          <Chip
+            selected={activeFilter === false}
+            onPress={() => handleFilterPress(false)}
+            style={{ backgroundColor: colors.surface }}
+            selectedColor={colors.error}
+          >
+            Inactive
+          </Chip>
+        </View>
+
+        {/* List */}
+        {isError ? (
+          <View className="flex-1 items-center justify-center">
+            <Text style={{ color: colors.error }}>Failed to load customers.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={data?.results ?? []}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <CustomerCard
+                customer={item}
+                onPress={(customer: Customer) => router.push(`/(app)/customers/${customer.id}`)}
+              />
+            )}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
+            onRefresh={refetch}
+            refreshing={isLoading}
+            ListEmptyComponent={
+              !isLoading ? (
+                <View className="items-center justify-center pt-8">
+                  <Text style={{ color: colors.textSecondary }}>No customers found.</Text>
+                </View>
+              ) : null
+            }
+          />
+        )}
       </View>
 
-      {/* List */}
-      {isError ? (
-        <View style={styles.centered}>
-          <Text style={{ color: colors.error }}>Failed to load customers.</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={data?.results ?? []}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <CustomerCard
-              customer={item}
-              onPress={(customer: Customer) => router.push(`/(app)/customers/${customer.id}`)}
-            />
-          )}
-          contentContainerStyle={styles.list}
-          onRefresh={refetch}
-          refreshing={isLoading}
-          ListEmptyComponent={
-            !isLoading ? (
-              <View style={styles.centered}>
-                <Text style={{ color: colors.textSecondary }}>No customers found.</Text>
-              </View>
-            ) : null
-          }
-        />
-      )}
-
-      {/* FAB — create new customer */}
+      {/* FAB */}
       <FAB
         icon="plus"
-        style={styles.fab}
-        color={colors.surface}
+        label="Add Customer"
+        color="#ffffff"
         onPress={() => router.push('/(app)/customers/new')}
+        style={{ position: 'absolute', bottom: 16, right: 16, backgroundColor: colors.primary }}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  searchbar: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-  },
-  filters: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  chip: {
-    backgroundColor: colors.surface,
-  },
-  list: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xl,
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: spacing.xl,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: spacing.xl,
-    right: spacing.md,
-    backgroundColor: colors.primary,
-    borderRadius: radius.full,
-  },
-});
