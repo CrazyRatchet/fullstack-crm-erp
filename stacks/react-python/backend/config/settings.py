@@ -59,6 +59,10 @@ LOCAL_APPS = [
     "contacts", # Contact of the customers
     "leads", # Leads
     "dashboard", # Dashboard
+    "quotations", # Quotations
+    "sales", # Sales orders
+    "invoices", # Invoices
+    "inventory", # Inventory management
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
