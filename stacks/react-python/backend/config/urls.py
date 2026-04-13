@@ -20,4 +20,8 @@ urlpatterns = [
     path("api/v1/", include("contacts.urls")),
     path("api/v1/", include("leads.urls")),
     path("api/v1/", include("dashboard.urls")),
+    path("api/v1/", include("quotations.urls")),
+    path("api/v1/", include("sales.urls")),
+    path("api/v1/", include("invoices.urls")),
+    path("api/v1/", include("inventory.urls")),
 ]
